@@ -1,5 +1,5 @@
 var five = require("johnny-five");
-// Default board initialization
+// Default board initialization (set here as example)
 // var board = new five.Board();
 
 var board = new five.Board({
