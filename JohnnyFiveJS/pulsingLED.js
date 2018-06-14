@@ -1,5 +1,7 @@
 var five = require("johnny-five");
+// Default board initialization (set here as example)
 // var board = new five.Board();
+// test
 
 var board = new five.Board({
   port: "COM4"
