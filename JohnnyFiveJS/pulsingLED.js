@@ -2,7 +2,7 @@ var five = require("johnny-five");
 // var board = new five.Board();
 
 var board = new five.Board({
-  port: "COM3"
+  port: "COM4"
 });
 
 board.on("ready", function() {
