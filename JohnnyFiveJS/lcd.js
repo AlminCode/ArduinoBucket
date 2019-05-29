@@ -5,7 +5,7 @@ var board = new five.Board({
 
 const Octokit = require('@octokit/rest')
 const octokit = new Octokit({
-  auth: "23b96f5d10e099c72bfd91a3c8fa652d05daa320"
+  auth: ""
 })
 
 
