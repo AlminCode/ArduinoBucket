@@ -4,10 +4,38 @@ var board = new five.Board({
 })
 
 const Octokit = require('@octokit/rest')
-const octokit = new Octokit()
+const octokit = new Octokit({
+  auth: "23b96f5d10e099c72bfd91a3c8fa652d05daa320"
+})
 
 
-board.on("ready", function() {
+
+function getDataFromRepoOrg() {
+// Compare: https://developer.github.com/v3/repos/#list-organization-repositories
+octokit.repos.listForOrg({
+  org: 'eversport',
+  type: 'private'
+}).then(({ data }) => {
+  // handle data
+  console.log("DATA")
+  console.log(data)
+  return data
+})
+}
+
+async function getAllNotifications() {
+  const ret = octokit.activity.listNotifications({
+    all: true
+  })
+  return ret.then((data) => {
+    // console.log('DATA', data)
+    return data.data
+  })
+}
+
+
+
+board.on("ready", async function() {
   var i = 0
   var lcd = new five.LCD({
     controller: "PCF8574T"
@@ -19,7 +47,21 @@ board.on("ready", function() {
   lcd.useChar("box2")
   lcd.useChar("box4")
   lcd.useChar("box14")
+ 
 
+  setInterval( async function() {
+    const notifications = await getAllNotifications()
+    var led = new five.Led(11);
+    console.log('NOTIFICATION: ', notifications)
+    if (notifications.length > 0) {
+      led.fadeIn()
+      lcd.cursor(0,0).print("NOTIFICATION")
+   } else {
+     led.off()
+     lcd.cursor(0,0).print("No Notification")
+   }
+ }, 5000);
+  
   // lcd.cursor(1, 0).print("Bloop")
   // lcd.home().print("Bleep")
   // lcd.cursor(0, 0).print("Initializing...")
@@ -27,18 +69,8 @@ board.on("ready", function() {
   // lcd.cursor(4, 0).print("I :check::heart: 2 :duck: :)")
   // lcd.autoscroll().print("Bloop").print("Bleep");
 // The starting position of the LCD display
-lcd.cursor(0, 0).print(":box14:");
+// lcd.cursor(0, 0).print(":box14:");
 
 // The second line, first character of the LCD display
-lcd.cursor(1, 1).print(":box14:");
-
-
-  // setInterval(() => {
-  //   lcd.clear()
-  //   lcd.noBacklight()
-  //   lcd.print("Hello :heart:")
-   
-  //   i++
-  //   lcd.backlight()
-  // }, 1500)
+// lcd.cursor(1, 1).print(":box14:");
 })
