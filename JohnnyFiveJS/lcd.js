@@ -11,7 +11,6 @@ const octokit = new Octokit({
 
 
 function getDataFromRepoOrg() {
-// Compare: https://developer.github.com/v3/repos/#list-organization-repositories
 octokit.repos.listForOrg({
   org: 'eversport',
   type: 'private'
