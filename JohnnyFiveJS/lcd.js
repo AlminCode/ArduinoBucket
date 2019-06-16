@@ -5,20 +5,17 @@ var board = new five.Board({
 
 const Octokit = require('@octokit/rest')
 const octokit = new Octokit({
-  auth: "23b96f5d10e099c72bfd91a3c8fa652d05daa320"
+  auth: "c46bc8e827709b0780e975700e0699851521a2a4"
 })
+const scroll = require('lcd-scrolling')
 
 
 
 function getDataFromRepoOrg() {
-// Compare: https://developer.github.com/v3/repos/#list-organization-repositories
 octokit.repos.listForOrg({
   org: 'eversport',
   type: 'private'
 }).then(({ data }) => {
-  // handle data
-  console.log("DATA")
-  console.log(data)
   return data
 })
 }
@@ -33,35 +30,33 @@ async function getAllNotifications() {
   })
 }
 
+async function getALlPrs() {
+  const ret = octokit.pulls.list({
+    owner: "eversport",
+    repo: "eversports",
+    state: "open",
+    per_page: "100"
+  })
+  return ret.then((data) => {
+    return data.data.length
+  })
+}
+
+
+
 
 
 board.on("ready", async function() {
-  var i = 0
+
   var lcd = new five.LCD({
     controller: "PCF8574T"
   })
-  lcd.useChar("check")
-  lcd.useChar("heart")
-  lcd.useChar("duck")
-  lcd.useChar("box1")
-  lcd.useChar("box2")
-  lcd.useChar("box4")
-  lcd.useChar("box14")
- 
-
   setInterval( async function() {
-    const notifications = await getAllNotifications()
-    var led = new five.Led(11);
-    console.log('NOTIFICATION: ', notifications)
-    if (notifications.length > 0) {
-      led.fadeIn()
-      lcd.cursor(0,0).print("NOTIFICATION")
-   } else {
-     led.off()
-     lcd.cursor(0,0).print("No Notification")
-   }
- }, 5000);
-  
+  DisplayPRNumber(lcd)
+  }, 5000)
+
+// scroll.line( 0, "Text of the first line" );
+// scroll.line( 1, "Second line here" );
   // lcd.cursor(1, 0).print("Bloop")
   // lcd.home().print("Bleep")
   // lcd.cursor(0, 0).print("Initializing...")
@@ -74,3 +69,52 @@ board.on("ready", async function() {
 // The second line, first character of the LCD display
 // lcd.cursor(1, 1).print(":box14:");
 })
+
+
+
+async function DisplayPRNumber(lcd) {
+  const prs = await getALlPrs()
+  lcd.cursor(0,0).print('NUMBER OF PRS:')
+  lcd.cursor(1,0).print(prs)
+}
+
+
+function DisplayNotifications() {
+  scroll.setup({
+    lcd: lcd, /* Required */
+    
+    // Optional parameters defaults
+    // debug: false, - true will enable console.log()
+    char_length: 16, // - Number of characters per line on your LCD
+    row: 2,// - Number of rows on your LCD
+    firstCharPauseDuration: 4000,// - Duration of the pause before your text start scrolling. Value in ms
+    lastCharPauseDuration: 2000,// - Duration to wait before restarting the animation
+    scrollingDuration: 1000,// - Time per step (speed of the animation).
+    full: true //- Extend text with white space to be animated out of the screen completely
+  
+  });
+
+  var led = new five.Led(11);
+  
+  setInterval( async function() {
+    const notifications = await getAllNotifications()
+    led.fadeOut()
+    console.log('NOTIFICATION: ', notifications)
+    console.log('NOTIFICATION SUBJ: ', notifications[0].subject.title)
+    if (notifications.length > 0) {
+      led.fadeIn()
+      // setTimeout(() => {
+      //   lcd.cursor(0,0).print("NOTIFICATION:")
+      //   lcd.clear()
+      // }, 2000)
+      // lcd.noBlink().cursor(0, 0).print("Subject:")
+      // scroll.line(0, "Subject:")
+      scroll.line(0, notifications[0].subject.title)
+      // lcd.autoscroll().cursor(1,0).print(notifications[0].subject.title)
+   } else {
+     led.off()
+     lcd.cursor(0,0).print("No Notification")
+   }
+ }, 5000);
+
+}
