@@ -5,7 +5,7 @@ var board = new five.Board({
 
 const Octokit = require('@octokit/rest')
 const octokit = new Octokit({
-  auth: "c46bc8e827709b0780e975700e0699851521a2a4"
+  auth: "3ab4e19417ac9b090edb17457a0ba738585b7658"
 })
 const scroll = require('lcd-scrolling')
 
